@@ -4,6 +4,8 @@
 original `BMC` WPF project. This Python CLI reuses the same conversion rules and
 folder traversal behavior without depending on the original desktop app stack.
 
+Caveat: tested on a single collection bm25 -> AAC conversion.
+
 ## Run a smoke test
 
 ```bash
@@ -16,12 +18,24 @@ python3 py/bmc_cli.py ./BMWData/Music --output ./converted-sample --limit 3 --ve
 python3 py/bmc_cli.py ./BMWData/Music --output ./converted-full
 ```
 
+## Rewrite filenames from tags
+
+```bash
+uv run py/rename_from_tags.py ./converted-full --dry-run
+uv run py/rename_from_tags.py ./converted-full
+```
+
 ## Notes
 
 - Default head unit is `NBT`.
 - Converted files preserve the source folder structure under the output directory.
 - Existing output files are skipped unless `--overwrite` is passed.
 - `--next-to-source` writes converted files next to the original `BR*` files.
+- `py/rename_from_tags.py` only rewrites filenames in place. Folder names are preserved.
+- Files with missing or unusable tags are left unchanged.
+- Some collections contain invalid embedded tags where every track in an album has the
+  same title. In those cases `py/rename_from_tags.py` can produce misleading repeated
+  filenames that differ only by track number.
 
 ## How It Works
 
