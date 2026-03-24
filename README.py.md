@@ -1,6 +1,6 @@
 # BMC Python CLI
 
-`py/bmc_cli.py` is a small command-line port of the core conversion logic from the
+`py/bmc.py` is a small command-line port of the core conversion logic from the
 original `BMC` WPF project. This Python CLI reuses the same conversion rules and
 folder traversal behavior without depending on the original desktop app stack.
 
@@ -9,13 +9,13 @@ Caveat: tested on a single collection bm25 -> AAC conversion.
 ## Run a smoke test
 
 ```bash
-python3 py/bmc_cli.py ./BMWData/Music --output ./converted-sample --limit 3 --verbose
+python3 py/bmc.py ./BMWData/Music --output ./converted-sample --limit 3 --verbose
 ```
 
 ## Convert the full export
 
 ```bash
-python3 py/bmc_cli.py ./BMWData/Music --output ./converted-full
+python3 py/bmc.py ./BMWData/Music --output ./converted-full
 ```
 
 ## Rewrite filenames from tags
