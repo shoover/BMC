@@ -20,9 +20,11 @@ python3 py/bmc.py ./BMWData/Music --output ./converted-full
 
 ## Rewrite filenames from tags
 
+Prerequisite: `ffprobe` on the PATH, e.g. install ffmpeg.
+
 ```bash
-uv run py/rename_from_tags.py ./converted-full --dry-run
-uv run py/rename_from_tags.py ./converted-full
+python3 py/rename_from_tags.py ./converted-full --dry-run
+python3 py/rename_from_tags.py ./converted-full
 ```
 
 ## Notes
@@ -36,6 +38,10 @@ uv run py/rename_from_tags.py ./converted-full
 - Some collections contain invalid embedded tags where every track in an album has the
   same title. In those cases `py/rename_from_tags.py` can produce misleading repeated
   filenames that differ only by track number.
+- `py/rename_from_tags.py` uses `ffprobe` because recovered AAC files can still expose
+  readable tags even when Python metadata libraries are less reliable on the same files.
+  This avoids extra Python package installation and handled malformed AAC
+  payloads during testing.
 
 ## How It Works
 

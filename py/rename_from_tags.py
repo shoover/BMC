@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.11"
-# dependencies = [
-#   "mutagen>=1.47.0",
-# ]
 # ///
 
 """Rename audio files in place from embedded tags without moving folders.
@@ -23,14 +20,6 @@ from pathlib import Path
 import re
 import subprocess
 import sys
-
-try:
-    from mutagen import File as MutagenFile
-    from mutagen.id3 import ID3, ID3NoHeaderError
-except ModuleNotFoundError:  # pragma: no cover - optional dependency
-    MutagenFile = None
-    ID3 = None
-    ID3NoHeaderError = None
 
 
 SUPPORTED_EXTENSIONS = {".aac", ".m4a", ".mp3", ".mp4", ".flac", ".wma"}
@@ -127,74 +116,7 @@ def sanitize_filename_part(value: str) -> str:
 
 
 def read_tags(path: Path) -> TrackTags | None:
-    tags = read_tags_mutagen(path)
-    if tags is not None:
-        return tags
     return read_tags_ffprobe(path)
-
-
-def read_tags_mutagen(path: Path) -> TrackTags | None:
-    if MutagenFile is None:
-        return None
-
-    try:
-        audio = MutagenFile(path, easy=True)
-    except Exception:
-        audio = None
-    if audio is not None and audio.tags:
-        title = first_value(audio.tags.get("title"))
-        track = parse_track_number(first_value(audio.tags.get("tracknumber")))
-        if title and track is not None:
-            title = sanitize_filename_part(title)
-            if title:
-                return TrackTags(track=track, title=title)
-
-    try:
-        audio = MutagenFile(path)
-    except Exception:
-        audio = None
-    if audio is not None and getattr(audio, "tags", None):
-        tags = audio.tags
-        title = None
-        track = None
-
-        if "\xa9nam" in tags:
-            title = first_value(tags.get("\xa9nam"))
-        if "trkn" in tags:
-            track_value = tags.get("trkn")
-            if isinstance(track_value, list) and track_value:
-                first_track = track_value[0]
-                if isinstance(first_track, tuple) and first_track:
-                    track = first_track[0]
-
-        if title is None and "TIT2" in tags:
-            title = first_value(tags.get("TIT2"))
-        if track is None and "TRCK" in tags:
-            track = parse_track_number(first_value(tags.get("TRCK")))
-
-        if title and track is not None:
-            title = sanitize_filename_part(title)
-            if title:
-                return TrackTags(track=track, title=title)
-
-    if ID3 is None:
-        return None
-
-    try:
-        id3 = ID3(path)
-    except (ID3NoHeaderError, OSError):
-        return None
-
-    title = first_value(id3.get("TIT2"))
-    track = parse_track_number(first_value(id3.get("TRCK")))
-    if not title or track is None:
-        return None
-
-    title = sanitize_filename_part(title)
-    if not title:
-        return None
-
-    return TrackTags(track=track, title=title)
 
 
 def read_tags_ffprobe(path: Path) -> TrackTags | None:
